@@ -30,8 +30,9 @@ namespace CompanyApiTest.Controllers
             Assert.Equal("SLB", createdcompany.Name);
             Assert.NotEmpty(createdcompany.ID);
         }
+
         [Fact]
-        public async void Should_return_conflict_when_creat_same_Companies()
+        public async void Should_return_conflict_when_create_same_Companies()
         {
             //given
             var application = new WebApplicationFactory<Program>();
@@ -39,15 +40,10 @@ namespace CompanyApiTest.Controllers
             var company = new Company(name: "SLB");
             var serializedObject = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(serializedObject, Encoding.UTF8, "application/json");
-            //when
+            await httpClient.PostAsync("companies", postBody);
             var response = await httpClient.PostAsync("companies", postBody);
-            //then
             //response.EnsureSuccessStatusCode();
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-            var responseBody = await response.Content.ReadAsStringAsync();
-            var createdcompany = JsonConvert.DeserializeObject<Company>(responseBody);
-            Assert.Equal("SLB", createdcompany.Name);
-            Assert.NotEmpty(createdcompany.ID);
+            Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
         }
     }
 }
