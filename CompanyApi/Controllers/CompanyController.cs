@@ -20,7 +20,7 @@ namespace CompanyApi.Controllers
                 return Conflict();
             }
 
-            company.CompanyId ??= Guid.NewGuid().ToString();
+            company.CompanyId = Guid.NewGuid().ToString();
 
             companies.Add(company);
             return new CreatedResult($"/companies/{company.CompanyId}", company);

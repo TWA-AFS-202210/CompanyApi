@@ -1,10 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using CompanyApi.Model;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
 using Xunit;
@@ -99,28 +102,22 @@ namespace CompanyApiTest.Controllers
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
             await httpClient.DeleteAsync("/companies");
-            var companyList = new List<Company>()
-            {
-                new Company(name: "SLB"),
-                new Company(name: "TW"),
-            };
-            companyList[0].CompanyId = "SLB_ID";
+            var company = new Company(name: "SLB");
 
-            foreach (var company in companyList)
-            {
-                var companyJson = JsonConvert.SerializeObject(company);
-                var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
-                await httpClient.PostAsync("/companies", postBody);
-            }
+            var companyJson = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            var addCompany = await httpClient.PostAsync("/companies", postBody);
+            var addCompanyBody = await addCompany.Content.ReadAsStringAsync();
+            var companyId = JsonConvert.DeserializeObject<Company>(addCompanyBody).CompanyId;
 
             //when
-            var response = await httpClient.GetAsync($"companies/SLB_ID");
+            var response = await httpClient.GetAsync($"companies/{companyId}");
 
             // then
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
             var getCompany = JsonConvert.DeserializeObject<Company>(responseBody);
-            Assert.Equal(companyList[0].Name, getCompany.Name);
+            Assert.Equal(company.Name, getCompany.Name);
         }
 
         [Fact]
@@ -129,23 +126,14 @@ namespace CompanyApiTest.Controllers
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
             await httpClient.DeleteAsync("/companies");
-            var companyList = new List<Company>()
-            {
-                new Company(name: "SLB"),
-                new Company(name: "TW"),
-            };
-            companyList[0].CompanyId = "SLB_ID";
-            companyList[1].CompanyId = "TW_ID";
+            var company = new Company(name: "SLB");
 
-            foreach (var company in companyList)
-            {
-                var companyJson = JsonConvert.SerializeObject(company);
-                var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
-                await httpClient.PostAsync("/companies", postBody);
-            }
+            var companyJson = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json"); 
+            await httpClient.PostAsync("/companies", postBody);
 
             //when
-            var response = await httpClient.GetAsync($"companies/OtherCompany_ID");
+            var response = await httpClient.GetAsync("companies/OtherCompany_ID");
 
             // then
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
