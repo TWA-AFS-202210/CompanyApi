@@ -73,7 +73,7 @@ namespace CompanyApi.Controllers
         }
 
         [HttpPost("{companyId}")]
-        public ActionResult<Employee> AddAnEmployeeToSpecificCompany(string companyId, List<Employee> employee)
+        public ActionResult<List<Employee>> AddAnEmployeeToSpecificCompany(string companyId, List<Employee> employee)
         {
             foreach (var company in companies.Where(company => company.CompanyId == companyId))
             {
@@ -92,6 +92,23 @@ namespace CompanyApi.Controllers
                 if (company.CompanyId == companyId)
                 {
                     return company.Employee;
+                }
+            }
+
+            return NotFound();
+        }
+
+        [HttpPatch("{companyId}/employees/{employeeId}")]
+        public ActionResult<Employee> UpdateEmployeeInfoOfCompanyById(
+            string companyId, string employeeId, Employee employee)
+        {
+            foreach (var company in companies)
+            {
+                if (company.CompanyId == companyId)
+                {
+                    var index = company.Employee.FindIndex(_ => employee.EmployeeId == employeeId);
+                    company.Employee[index] = employee;
+                    return Ok(employee);
                 }
             }
 
