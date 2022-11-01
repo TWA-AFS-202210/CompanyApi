@@ -34,7 +34,7 @@ namespace CompanyApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Company>> GetAllCompanies()
+        public List<Company> GetAllCompanies([FromQuery] int? pageSize, [FromQuery] int? pageIndex)
         {
             return companies;
         }
@@ -43,7 +43,22 @@ namespace CompanyApi.Controllers
         [Route("{ID}")]
         public ActionResult<Company> GetExistingCompanies(string id)
         {
-            return companies.FirstOrDefault(_ => _.ID.Equals(id, StringComparison.Ordinal));
+            var foundcompany = companies.FirstOrDefault(_ => _.ID.Equals(id, StringComparison.Ordinal));
+            if (foundcompany == null)
+            {
+                return new NotFoundResult();
+            }
+
+            return foundcompany;
+        }
+
+        [HttpPatch]
+        [Route("{ID}")]
+        public ActionResult<Company> ModifyExistingCompanies(Company company)
+        {
+           var newcompany = companies.FirstOrDefault(_ => _.Name.Equals(_.Name));
+           newcompany.Name = company.Name;
+           return newcompany;
         }
     }
 }
