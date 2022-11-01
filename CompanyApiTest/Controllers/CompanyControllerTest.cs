@@ -122,5 +122,33 @@ namespace CompanyApiTest.Controllers
             var getCompany = JsonConvert.DeserializeObject<Company>(responseBody);
             Assert.Equal(companyList[0].Name, getCompany.Name);
         }
+
+        [Fact]
+        public async void Should_return_not_found_when_get_no_exist_company_by_id()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+            var companyList = new List<Company>()
+            {
+                new Company(name: "SLB"),
+                new Company(name: "TW"),
+            };
+            companyList[0].CompanyId = "SLB_ID";
+            companyList[1].CompanyId = "TW_ID";
+
+            foreach (var company in companyList)
+            {
+                var companyJson = JsonConvert.SerializeObject(company);
+                var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+                await httpClient.PostAsync("/companies", postBody);
+            }
+
+            //when
+            var response = await httpClient.GetAsync($"companies/OtherCompany_ID");
+
+            // then
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
     }
 }

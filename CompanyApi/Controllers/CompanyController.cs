@@ -38,10 +38,10 @@ namespace CompanyApi.Controllers
             return Ok(companies);
         }
 
-        [HttpGet("{id}")]
-        public ActionResult<Company> GetPetById(string id)
+        [HttpGet("{companyId}")]
+        public ActionResult<Company> GetPetById(string companyId)
         {
-            foreach (var company in companies.Where(company => company.CompanyId == id))
+            foreach (var company in companies.Where(company => company.CompanyId == companyId))
             {
                 return Ok(company);
             }
