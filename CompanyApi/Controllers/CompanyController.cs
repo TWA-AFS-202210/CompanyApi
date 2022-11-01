@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.InteropServices.ComTypes;
 using CompanyApi.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -109,6 +110,27 @@ namespace CompanyApi.Controllers
                     var index = company.Employee.FindIndex(_ => employee.EmployeeId == employeeId);
                     company.Employee[index] = employee;
                     return Ok(employee);
+                }
+            }
+
+            return NotFound();
+        }
+
+        [HttpDelete("{companyId}/employees/{employeeId}")]
+        public ActionResult<Employee> DeleteAnEmployeeOfCompany(string companyId, string employeeId)
+        {
+            foreach (var company in companies)
+            {
+                if (company.CompanyId == companyId)
+                {
+                    foreach (var existEmployee in company.Employee)
+                    {
+                        if (existEmployee.EmployeeId == employeeId)
+                        {
+                            company.Employee.Remove(existEmployee);
+                            return Ok(existEmployee);
+                        }
+                    }
                 }
             }
 

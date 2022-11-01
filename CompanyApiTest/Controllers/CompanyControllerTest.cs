@@ -305,6 +305,38 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(employees[0], deserializeObjectToEmployee);
         }
 
+        [Fact]
+        public async void Delete_an_employee_of_company()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+
+            var company = new Company(name: "SLB");
+            var response = await httpClient.PostAsync("/companies", SerializeCompanyToStringContent(company));
+            var companyId = DeserializeObjectToCompany(response).Result.CompanyId;
+
+            var employeeList = new List<Employee>()
+            {
+                new Employee(name: "YZJ", salary: 10),
+                new Employee(name: "LJ", salary: 11),
+                new Employee(name: "LWR", salary: 12),
+            };
+            var employeePostBody = SerializeEmployeeListToStringContent(employeeList);
+            await httpClient.PostAsync($"/companies/{companyId}", employeePostBody);
+
+            var allEmployeeResponse = await httpClient.GetAsync($"/companies/{companyId}/employees");
+            var employees = DeserializeObjectToEmployeeList(allEmployeeResponse).Result;
+
+            var modifyEmployee = SerializeEmployeeToStringContent(employees[0]);
+            var deleteEmployeeMessage = httpClient.DeleteAsync(
+                $"/companies/{companyId}/employees/{employees[0].EmployeeId}").Result;
+
+            var deserializeObjectToEmployee = DeserializeObjectToEmployee(deleteEmployeeMessage).Result;
+
+            Assert.Equal(employees[0], deserializeObjectToEmployee);
+        }
+
         private static StringContent SerializeCompanyToStringContent(Company company)
         {
             var companyJson = JsonConvert.SerializeObject(company);
