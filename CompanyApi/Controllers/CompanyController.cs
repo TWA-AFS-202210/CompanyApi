@@ -33,17 +33,38 @@ namespace CompanyApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult<List<Company>> GetAllPets()
+        public ActionResult<List<Company>> GetAllCompanies([FromQuery] int? pageSize, [FromQuery] int? pageIndex)
         {
+            if (pageSize != null && pageIndex != null)
+            {
+                // return companies.GetRange((pageIndex.Value - 1) * pageSize.Value, pageSize.Value);
+                return companies
+                    .Skip((pageIndex.Value - 1) * pageSize.Value)
+                    .Take(pageSize.Value)
+                    .ToList();
+            }
+
             return Ok(companies);
         }
 
         [HttpGet("{companyId}")]
-        public ActionResult<Company> GetPetById(string companyId)
+        public ActionResult<Company> GetCompanyById(string companyId)
         {
             foreach (var company in companies.Where(company => company.CompanyId == companyId))
             {
                 return Ok(company);
+            }
+
+            return NotFound();
+        }
+
+        [HttpPut("{companyId}")]
+        public ActionResult<Company> UpdateCompanyBasicInformationById(string companyId, Company company)
+        {
+            foreach (var existCompany in companies.Where(existCompany => existCompany.CompanyId == companyId))
+            {
+                existCompany.Name = company.Name;
+                return Ok(existCompany);
             }
 
             return NotFound();

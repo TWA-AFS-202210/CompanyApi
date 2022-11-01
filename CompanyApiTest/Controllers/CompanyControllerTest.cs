@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
 using Xunit;
 using Xunit.Sdk;
+using System.Reflection;
 
 namespace CompanyApiTest.Controllers
 {
@@ -129,7 +130,7 @@ namespace CompanyApiTest.Controllers
             var company = new Company(name: "SLB");
 
             var companyJson = JsonConvert.SerializeObject(company);
-            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json"); 
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
             await httpClient.PostAsync("/companies", postBody);
 
             //when
@@ -137,6 +138,93 @@ namespace CompanyApiTest.Controllers
 
             // then
             Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
+
+        [Fact]
+        public async void Should_obtain_X_page_size_companies_from_index_of_Y()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+            var companyList = new List<Company>()
+            {
+                new Company(name: "SLB"),
+                new Company(name: "TW"),
+                new Company(name: "APPLE"),
+                new Company(name: "MICROSOFT"),
+            };
+
+            foreach (var company in companyList)
+            {
+                var companyJson = JsonConvert.SerializeObject(company);
+                var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+                await httpClient.PostAsync("/companies", postBody);
+            }
+
+            //when
+            var responseList = await httpClient.GetAsync("/companies?pageSize=2&&pageIndex=2");
+
+            // then
+            var getCompanies = new List<Company>()
+            {
+                new Company(name: "APPLE"),
+                new Company(name: "MICROSOFT"),
+            };
+            responseList.EnsureSuccessStatusCode();
+            var responseBody = await responseList.Content.ReadAsStringAsync();
+            var allCompanies = JsonConvert.DeserializeObject<List<Company>>(responseBody);
+            Assert.Equal(getCompanies, allCompanies);
+            Assert.Equal(HttpStatusCode.OK, responseList.StatusCode);
+        }
+
+        [Fact]
+        public async void Should_update_basic_information_of_an_existing_company()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+
+            var company = new Company(name: "SLB");
+            var companyJson = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("/companies", postBody);
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var originCompany = JsonConvert.DeserializeObject<Company>(responseBody);
+
+            company.Name = "slb";
+            var modifyCompanyJson = JsonConvert.SerializeObject(company);
+            var modifyPostBody = new StringContent(modifyCompanyJson, Encoding.UTF8, "application/json");
+
+            //when
+            var companyId = originCompany.CompanyId;
+            var modifyResponse = await httpClient.PutAsync($"/companies/{companyId}", modifyPostBody);
+
+            // then
+            modifyResponse.EnsureSuccessStatusCode();
+            var resultResponseBody = await modifyResponse.Content.ReadAsStringAsync();
+            var resultCompany = JsonConvert.DeserializeObject<Company>(resultResponseBody);
+            Assert.Equal(company, resultCompany);
+            Assert.Equal(HttpStatusCode.OK, modifyResponse.StatusCode);
+        }
+
+        [Fact]
+        public async void Should_return_not_found_of_not_existing_company_when_modify()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+
+            var company = new Company(name: "SLB");
+            var companyJson = JsonConvert.SerializeObject(company);
+            var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+            await httpClient.PostAsync("/companies", postBody);
+
+            //when
+            var companyId = "otherCompanyId";
+            var modifyResponse = await httpClient.PutAsync($"/companies/{companyId}", postBody);
+
+            // then
+            Assert.Equal(HttpStatusCode.NotFound, modifyResponse.StatusCode);
         }
     }
 }

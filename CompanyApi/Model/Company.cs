@@ -12,7 +12,7 @@ namespace CompanyApi.Model
         }
 
         public string? CompanyId { get; set; }
-        public string Name { get; private set; }
+        public string Name { get; set; }
 
         public override bool Equals(object? obj)
         {
