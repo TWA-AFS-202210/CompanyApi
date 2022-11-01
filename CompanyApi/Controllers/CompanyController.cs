@@ -26,5 +26,24 @@ namespace CompanyApi.Controllers
             companies.Add(company);
             return new CreatedResult($"/companies/{company.ID}", company);
         }
+
+        [HttpDelete]
+        public void DeleteAllCompanies()
+        {
+            companies.Clear();
+        }
+
+        [HttpGet]
+        public ActionResult<List<Company>> GetAllCompanies()
+        {
+            return companies;
+        }
+
+        [HttpGet]
+        [Route("{ID}")]
+        public ActionResult<Company> GetExistingCompanies(string id)
+        {
+            return companies.FirstOrDefault(_ => _.ID.Equals(id, StringComparison.Ordinal));
+        }
     }
 }
