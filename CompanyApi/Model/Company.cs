@@ -9,10 +9,12 @@ namespace CompanyApi.Model
         public Company(string name)
         {
             Name = name;
+            Employee = new Employee(name: " ", salary: 0);
         }
 
         public string? CompanyId { get; set; }
         public string Name { get; set; }
+        public Employee Employee { get; set; }
 
         public override bool Equals(object? obj)
         {

@@ -69,5 +69,18 @@ namespace CompanyApi.Controllers
 
             return NotFound();
         }
+
+        [HttpPost("{companyId}")]
+        public ActionResult<Employee> AddAnEmployeeToSpecificCompany(string companyId, Employee employee)
+        {
+            foreach (var company in companies.Where(company => company.CompanyId == companyId))
+            {
+                employee.EmployeeId = Guid.NewGuid().ToString();
+                company.Employee = employee;
+                return Ok(employee);
+            }
+
+            return NotFound();
+        }
     }
 }
