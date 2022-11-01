@@ -9,6 +9,7 @@ namespace CompanyApi.Model
         public Employee(string name, int salary)
         {
             Name = name;
+            EmployeeId = Guid.NewGuid().ToString();
         }
 
         public string? EmployeeId { get; set; }

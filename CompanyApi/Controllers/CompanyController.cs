@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using CompanyApi.Model;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,6 +13,7 @@ namespace CompanyApi.Controllers
     public class CompanyController : ControllerBase
     {
         private static List<Company> companies = new List<Company>();
+
         [HttpPost]
         public ActionResult<Company> AddNewCompany(Company company)
         {
@@ -71,13 +73,26 @@ namespace CompanyApi.Controllers
         }
 
         [HttpPost("{companyId}")]
-        public ActionResult<Employee> AddAnEmployeeToSpecificCompany(string companyId, Employee employee)
+        public ActionResult<Employee> AddAnEmployeeToSpecificCompany(string companyId, List<Employee> employee)
         {
             foreach (var company in companies.Where(company => company.CompanyId == companyId))
             {
-                employee.EmployeeId = Guid.NewGuid().ToString();
                 company.Employee = employee;
                 return Ok(employee);
+            }
+
+            return NotFound();
+        }
+
+        [HttpGet("{companyId}/employees")]
+        public ActionResult<List<Employee>> GetListOfEmployeeOfCompanyById(string companyId)
+        {
+            foreach (var company in companies)
+            {
+                if (company.CompanyId == companyId)
+                {
+                    return company.Employee;
+                }
             }
 
             return NotFound();

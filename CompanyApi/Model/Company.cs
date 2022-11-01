@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Hosting;
 using System.Drawing;
 using System;
+using System.Collections.Generic;
 
 namespace CompanyApi.Model
 {
@@ -9,12 +10,12 @@ namespace CompanyApi.Model
         public Company(string name)
         {
             Name = name;
-            Employee = new Employee(name: " ", salary: 0);
+            Employee = new List<Employee>();
         }
 
         public string? CompanyId { get; set; }
         public string Name { get; set; }
-        public Employee Employee { get; set; }
+        public List<Employee> Employee { get; set; }
 
         public override bool Equals(object? obj)
         {
