@@ -337,6 +337,35 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(employees[0], deserializeObjectToEmployee);
         }
 
+        [Fact]
+        public async void Should_Delete_company_by_id()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+
+            var company = new Company(name: "SLB");
+            var companyResponse = await httpClient.PostAsync("/companies", SerializeCompanyToStringContent(company));
+            var companyId = DeserializeObjectToCompany(companyResponse).Result.CompanyId;
+
+            var employeeList = new List<Employee>()
+            {
+                new Employee(name: "YZJ", salary: 10),
+                new Employee(name: "LJ", salary: 11),
+                new Employee(name: "LWR", salary: 12),
+            };
+            var employeePostBody = SerializeEmployeeListToStringContent(employeeList);
+            await httpClient.PostAsync($"/companies/{companyId}", employeePostBody);
+
+            //when
+            var response = await httpClient.DeleteAsync($"companies/{companyId}");
+
+            // then
+            response.EnsureSuccessStatusCode();
+            var getCompany = DeserializeObjectToCompany(response).Result;
+            Assert.Equal(company, getCompany);
+        }
+
         private static StringContent SerializeCompanyToStringContent(Company company)
         {
             var companyJson = JsonConvert.SerializeObject(company);

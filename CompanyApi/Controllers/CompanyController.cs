@@ -136,5 +136,20 @@ namespace CompanyApi.Controllers
 
             return NotFound();
         }
+
+        [HttpDelete("{companyId}")]
+        public ActionResult<Employee> DeleteCompanyById(string companyId)
+        {
+            foreach (var company in companies)
+            {
+                if (company.CompanyId == companyId)
+                {
+                    companies.Remove(company);
+                    return Ok(company);
+                }
+            }
+
+            return NotFound();
+        }
     }
 }
