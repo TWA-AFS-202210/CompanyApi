@@ -92,5 +92,35 @@ namespace CompanyApiTest.Controllers
             Assert.Equal(companyList, allCompanies);
             Assert.Equal(HttpStatusCode.OK, responseList.StatusCode);
         }
+
+        [Fact]
+        public async void Should_get_company_by_id_of_system_successfully()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+            var companyList = new List<Company>()
+            {
+                new Company(name: "SLB"),
+                new Company(name: "TW"),
+            };
+            companyList[0].CompanyId = "SLB_ID";
+
+            foreach (var company in companyList)
+            {
+                var companyJson = JsonConvert.SerializeObject(company);
+                var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+                await httpClient.PostAsync("/companies", postBody);
+            }
+
+            //when
+            var response = await httpClient.GetAsync($"companies/SLB_ID");
+
+            // then
+            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var getCompany = JsonConvert.DeserializeObject<Company>(responseBody);
+            Assert.Equal(companyList[0].Name, getCompany.Name);
+        }
     }
 }

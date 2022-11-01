@@ -20,7 +20,8 @@ namespace CompanyApi.Controllers
                 return Conflict();
             }
 
-            company.CompanyId = Guid.NewGuid().ToString();
+            company.CompanyId ??= Guid.NewGuid().ToString();
+
             companies.Add(company);
             return new CreatedResult($"/companies/{company.CompanyId}", company);
         }
@@ -35,6 +36,17 @@ namespace CompanyApi.Controllers
         public ActionResult<List<Company>> GetAllPets()
         {
             return Ok(companies);
+        }
+
+        [HttpGet("{id}")]
+        public ActionResult<Company> GetPetById(string id)
+        {
+            foreach (var company in companies.Where(company => company.CompanyId == id))
+            {
+                return Ok(company);
+            }
+
+            return NotFound();
         }
     }
 }
