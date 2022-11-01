@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
+using System.Drawing;
+using System;
 
 namespace CompanyApi.Model
 {
@@ -11,6 +13,13 @@ namespace CompanyApi.Model
 
         public string? CompanyId { get; set; }
         public string Name { get; private set; }
+
+        public override bool Equals(object? obj)
+        {
+            var company = obj as Company;
+            return company != null &&
+                   company.Name == Name;
+        }
     }
 }
 

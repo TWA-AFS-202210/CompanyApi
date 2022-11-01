@@ -1,7 +1,9 @@
-﻿using System.Net;
+﻿using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using CompanyApi.Model;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Newtonsoft.Json;
@@ -26,7 +28,7 @@ namespace CompanyApiTest.Controllers
             // given
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
-            await httpClient.DeleteAsync("/companies/deleteAllCompanies");
+            await httpClient.DeleteAsync("/companies");
             var company = new Company(name: "SLB");
             var companyJson = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
@@ -48,7 +50,7 @@ namespace CompanyApiTest.Controllers
             // given
             var application = new WebApplicationFactory<Program>();
             var httpClient = application.CreateClient();
-            await httpClient.DeleteAsync("/companies/deleteAllCompanies");
+            await httpClient.DeleteAsync("/companies");
             var company = new Company(name: "SLB");
             var companyJson = JsonConvert.SerializeObject(company);
             var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
@@ -59,6 +61,36 @@ namespace CompanyApiTest.Controllers
 
             // then
             Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        }
+
+        [Fact]
+        public async void Should_get_all_companies_successfully()
+        {
+            var application = new WebApplicationFactory<Program>();
+            var httpClient = application.CreateClient();
+            await httpClient.DeleteAsync("/companies");
+            var companyList = new List<Company>()
+            {
+                new Company(name: "SLB"),
+                new Company(name: "TW"),
+            };
+
+            foreach (var company in companyList)
+            {
+                var companyJson = JsonConvert.SerializeObject(company);
+                var postBody = new StringContent(companyJson, Encoding.UTF8, "application/json");
+                await httpClient.PostAsync("/companies", postBody);
+            }
+
+            //when
+            var responseList = await httpClient.GetAsync("/companies");
+
+            // then
+            responseList.EnsureSuccessStatusCode();
+            var responseBody = await responseList.Content.ReadAsStringAsync();
+            var allCompanies = JsonConvert.DeserializeObject<List<Company>>(responseBody);
+            Assert.Equal(companyList, allCompanies);
+            Assert.Equal(HttpStatusCode.OK, responseList.StatusCode);
         }
     }
 }
