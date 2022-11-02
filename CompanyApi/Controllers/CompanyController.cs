@@ -88,68 +88,61 @@ namespace CompanyApi.Controllers
         [HttpGet("{companyId}/employees")]
         public ActionResult<List<Employee>> GetListOfEmployeeOfCompanyById(string companyId)
         {
-            foreach (var company in companies)
+            var company = companies.Find(existCompany => existCompany.CompanyId == companyId);
+            if (company == null)
             {
-                if (company.CompanyId == companyId)
-                {
-                    return company.Employee;
-                }
+                return NotFound();
             }
-
-            return NotFound();
+            else
+            {
+                return company.Employee;
+            }
         }
 
         [HttpPatch("{companyId}/employees/{employeeId}")]
         public ActionResult<Employee> UpdateEmployeeInfoOfCompanyById(
             string companyId, string employeeId, Employee employee)
         {
-            foreach (var company in companies)
+            var company = companies.Find(_ => _.CompanyId == companyId);
+            if (company == null)
             {
-                if (company.CompanyId == companyId)
-                {
-                    var index = company.Employee.FindIndex(_ => employee.EmployeeId == employeeId);
-                    company.Employee[index] = employee;
-                    return Ok(employee);
-                }
+                return NotFound();
             }
 
-            return NotFound();
+            var index = company.Employee.FindIndex(_ => employee.EmployeeId == employeeId);
+            company.Employee[index] = employee;
+            return Ok(employee);
         }
 
         [HttpDelete("{companyId}/employees/{employeeId}")]
         public ActionResult<Employee> DeleteAnEmployeeOfCompany(string companyId, string employeeId)
         {
-            foreach (var company in companies)
+            var company = companies.Find(_ => _.CompanyId == companyId);
+            if (company == null)
             {
-                if (company.CompanyId == companyId)
-                {
-                    foreach (var existEmployee in company.Employee)
-                    {
-                        if (existEmployee.EmployeeId == employeeId)
-                        {
-                            company.Employee.Remove(existEmployee);
-                            return Ok(existEmployee);
-                        }
-                    }
-                }
+                return NotFound();
             }
 
-            return NotFound();
+            var existEmployee = company.Employee.Find(_ => _.EmployeeId == employeeId);
+            if (company == null || existEmployee == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(existEmployee);
         }
 
         [HttpDelete("{companyId}")]
         public ActionResult<Employee> DeleteCompanyById(string companyId)
         {
-            foreach (var company in companies)
+            var company = companies.Find(_ => _.CompanyId == companyId);
+            if (company == null)
             {
-                if (company.CompanyId == companyId)
-                {
-                    companies.Remove(company);
-                    return Ok(company);
-                }
+                return NotFound();
             }
 
-            return NotFound();
+            companies.Remove(company);
+            return Ok(company);
         }
     }
 }
