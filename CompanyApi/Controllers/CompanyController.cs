@@ -34,14 +34,25 @@ namespace CompanyApi.Controllers
             companies.Clear();
         }
 
+        [HttpDelete("{ID}")]
+        public void DeleteAllEmployees([FromRoute] string id)
+        {
+            Company company = companies.Find(_ => _.ID == id);
+            if (company != null)
+            {
+                company.Employees.Clear();
+                companies.Remove(company);
+            }
+        }
+
         [HttpDelete("{companyID}/employees/{employeeID}")]
         public void DeleteEmployee([FromRoute] string companyID, [FromRoute] string employeeID)
         {
-            Company company = companies.Find(item => item.ID == companyID);
+            Company company = companies.Find(_ => _.ID == companyID);
             if (company != null)
             {
-                var employeeFound = company.Employees.Find(item => item.EmployeeID == employeeID);
-                company.Employees.Remove(employeeFound);
+                var employeedelete = company.Employees.Find(_ => _.EmployeeID == employeeID);
+                company.Employees.Remove(employeedelete);
             }
         }
 
@@ -73,7 +84,7 @@ namespace CompanyApi.Controllers
         [HttpGet("{ID}/employees")]
         public ActionResult<List<Employee>> GetAllEmployees([FromRoute] string id)
         {
-            Company company = companies.Find(x => x.ID == id);
+            Company company = companies.Find(_ => _.ID == id);
             if (company != null)
             {
                 return company.Employees;
@@ -97,19 +108,19 @@ namespace CompanyApi.Controllers
             Company company = companies.Find(item => item.ID == companyID);
             if (company != null)
             {
-                var employeeFound = company.Employees.Find(item => item.EmployeeID == employeeID);
-                employeeFound.EmployeeName = employee.EmployeeName;
-                employeeFound.EmployeeSalary = employee.EmployeeSalary;
-                return employeeFound;
+                var employeefind = company.Employees.Find(item => item.EmployeeID == employeeID);
+                employeefind.EmployeeName = employee.EmployeeName;
+                employeefind.EmployeeSalary = employee.EmployeeSalary;
+                return employeefind;
             }
 
             return BadRequest();
         }
 
         [HttpPost("{ID}/employees")]
-        public ActionResult<Employee> AddEmployeeToCompany([FromRoute] string? companyID, [FromBody] Employee employee)
+        public ActionResult<Employee> CreateNewEmployeeToCompany([FromRoute] string? id, [FromBody] Employee employee)
         {
-            var company = companies.Find(_ => _.ID == companyID);
+            var company = companies.Find(_ => _.ID == id);
             if (company == null)
             {
                 return NotFound();
@@ -117,7 +128,7 @@ namespace CompanyApi.Controllers
 
             company.Employees.Add(employee);
 
-            return new CreatedResult($"companies/{companyID}/employees/{employee.EmployeeID}", employee);
+            return new CreatedResult($"companies/{company.ID}/employees/{employee.EmployeeID}", employee);
         }
     }
 }

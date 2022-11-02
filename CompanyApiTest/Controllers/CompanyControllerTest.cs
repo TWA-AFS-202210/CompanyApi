@@ -149,12 +149,12 @@ namespace CompanyApiTest.Controllers
             await httpClient.DeleteAsync("companies");
             var company = new Company(name: "SLB");
             var createdcompany = await Createdcompany(company, httpClient);
-            var companyID = createdcompany.ID;
+            var Cid = createdcompany.ID;
             Employee employee = new Employee("DENG", 1);
             //when
             var serializedEmployee = JsonConvert.SerializeObject(employee);
             var postBody = new StringContent(serializedEmployee, Encoding.UTF8, "application/json");
-            var response = await httpClient.PostAsync($"companies/{companyID}/employees", postBody);
+            var response = await httpClient.PostAsync($"companies/{Cid}/employees", postBody);
             var responsebody = await response.Content.ReadAsStringAsync();
             var newemployee = JsonConvert.DeserializeObject<Employee>(responsebody);
             //then
@@ -238,6 +238,7 @@ namespace CompanyApiTest.Controllers
                 new Employee("marry", 2),
                 new Employee("lisa", 3),
             };
+            var deleteEmployeeId = employees[0].EmployeeID;
             foreach (Employee employee in employees)
             {
                 var employeeObject = JsonConvert.SerializeObject(employee);
@@ -245,17 +246,14 @@ namespace CompanyApiTest.Controllers
                 await httpClient.PostAsync($"/companies/{createdCompany.ID}/employees", postBody);
             }
 
-            var responseBody1 = await responseMessage.Content.ReadAsStringAsync();
-            var oneEmployee = JsonConvert.DeserializeObject<Employee>(responseBody1);
-
             //when
-            var reponse = await httpClient.DeleteAsync($"/companies/{createdCompany.ID}/employees/{oneEmployee.EmployeeID}");
-            //then
+             var reponse = await httpClient.DeleteAsync($"/companies/{createdCompany.ID}/employees/{deleteEmployeeId}");
+             //then
             Assert.Equal(HttpStatusCode.OK, reponse.StatusCode);
         }
 
         [Fact]
-        public async Task Should_delete_one_company_and_all__of_its_employees()
+        public async Task Should_delete_one_company_and_all_of_its_employees()
         {
             //given
             var application = new WebApplicationFactory<Program>();
@@ -298,6 +296,5 @@ namespace CompanyApiTest.Controllers
             var postBody = new StringContent(serializedObject, Encoding.UTF8, "application/json");
             return postBody;
         }
-
     }
 }
