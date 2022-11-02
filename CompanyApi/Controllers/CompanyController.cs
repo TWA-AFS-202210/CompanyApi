@@ -124,7 +124,7 @@ namespace CompanyApi.Controllers
             }
 
             var existEmployee = company.Employee.Find(_ => _.EmployeeId == employeeId);
-            if (company == null || existEmployee == null)
+            if (existEmployee == null)
             {
                 return NotFound();
             }

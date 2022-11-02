@@ -237,6 +237,12 @@ namespace CompanyApiTest.Controllers
             var addEmployee = DeserializeObjectToEmployeeList(addEmployeeResponse).Result;
             Assert.Equal(HttpStatusCode.OK, addEmployeeResponse.StatusCode);
             Assert.Equal(employee, addEmployee);
+
+            var modifyCompanyMessage = await httpClient.GetAsync($"companies/{companyId}");
+            var modifyCompany = DeserializeObjectToCompany(modifyCompanyMessage).Result;
+
+            Assert.Single(modifyCompany.Employee);
+            Assert.Equal(addEmployee, modifyCompany.Employee);
         }
 
         [Fact]
@@ -268,6 +274,11 @@ namespace CompanyApiTest.Controllers
             var addEmployeeList = DeserializeObjectToEmployeeList(addEmployeeListResponse).Result;
             Assert.Equal(HttpStatusCode.OK, addEmployeeListResponse.StatusCode);
             Assert.Equal(employeeList, addEmployeeList);
+
+            var modifyCompanyMessage = await httpClient.GetAsync($"companies/{companyId}");
+            var modifyCompany = DeserializeObjectToCompany(modifyCompanyMessage).Result;
+
+            Assert.Equal(employeeList, modifyCompany.Employee);
         }
 
         [Fact]
@@ -303,6 +314,11 @@ namespace CompanyApiTest.Controllers
             var deserializeObjectToEmployee = DeserializeObjectToEmployee(modifyEmployeeMessage).Result;
 
             Assert.Equal(employees[0], deserializeObjectToEmployee);
+
+            var modifyCompanyMessage = await httpClient.GetAsync($"companies/{companyId}");
+            var modifyCompany = DeserializeObjectToCompany(modifyCompanyMessage).Result;
+
+            Assert.Equal(employees[0], modifyCompany.Employee[0]);
         }
 
         [Fact]
